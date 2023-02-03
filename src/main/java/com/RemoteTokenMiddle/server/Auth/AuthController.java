@@ -25,26 +25,7 @@ public class AuthController {
         this.authService = authService;
     }
 
-    @GetMapping
-    public String test() {
-        return "test";
-    }
-
-    @GetMapping(path = "/check-auth")
-    public ResponseEntity<AuthResponse> checkAuth(HttpServletRequest request) {
-        Cookie[] cookies = request.getCookies();
-        if (cookies == null) {
-            return ResponseEntity.ok(new AuthResponse(false));
-        }
-        for (Cookie cookie : cookies) {
-            if (cookie.getName().equals("username") && cookie.getValue().equals("admin")) {
-                return ResponseEntity.ok(new AuthResponse(true, cookie.getValue()));
-            }
-        }
-        return new ResponseEntity<>(new AuthResponse(false), HttpStatus.UNAUTHORIZED);
-    }
-
-    @PostMapping(path = "/login")
+    @PostMapping(path = "/sign-in")
     public ResponseEntity<AuthResponse> authenticate(
             @RequestBody AuthRequest request, HttpServletResponse response) {
         
@@ -57,20 +38,9 @@ public class AuthController {
             cookie.setPath("/");
             cookie.setMaxAge(3600);
             response.addCookie(cookie);
-            return ResponseEntity.ok(authResponse);
+            return new ResponseEntity<>(authResponse, HttpStatus.OK);
         } else {
-            return ResponseEntity.badRequest().body(authResponse);
+            return new ResponseEntity<>(authResponse, HttpStatus.BAD_REQUEST);
         }
-    }
-
-    @DeleteMapping(path = "/logout")
-    public ResponseEntity<AuthResponse> logout(HttpServletResponse response) {
-        Cookie cookie = new Cookie("username", "");
-        cookie.setHttpOnly(true);
-        cookie.setSecure(false);
-        cookie.setPath("/");
-        cookie.setMaxAge(0);
-        response.addCookie(cookie);
-        return ResponseEntity.ok(new AuthResponse(false));
     }
 }

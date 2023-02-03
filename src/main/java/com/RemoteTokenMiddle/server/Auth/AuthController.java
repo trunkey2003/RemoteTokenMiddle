@@ -25,7 +25,7 @@ public class AuthController {
         this.authService = authService;
     }
 
-    @GetMapping("/")
+    @GetMapping
     public String test() {
         return "test";
     }

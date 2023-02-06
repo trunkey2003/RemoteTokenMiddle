@@ -1,10 +1,13 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useHistory } from "react-router-dom";
 import { Form, Input, Button, message } from "antd";
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
 import Axios from "../../utils/Axios";
 
 export default function SignIn() {
+  const navigate = useNavigate();
+
   const { t } = useTranslation();
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
@@ -14,6 +17,7 @@ export default function SignIn() {
     Axios.post("/auth/sign-in", { username, password })
       .then((res) => {
         message.success(t("login.loginMessageSuccess"));
+        navigate("/dashboard");
       })
       .catch(() => {
         message.error(t("login.loginMessageError"));
@@ -22,6 +26,13 @@ export default function SignIn() {
         setLoading(false);
       });
   };
+
+  useEffect(() => {
+    Axios.get("/auth/me").then((res) => {
+      navigate("/dashboard");
+    });
+  }, [])
+  
 
   return (
     <div

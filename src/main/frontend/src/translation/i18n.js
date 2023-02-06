@@ -7,10 +7,10 @@ import translationVI from '../locales/vi/translation';
 
 // the translations
 const resources = {
-    en: {
+    0: {
         translation: translationEN
     },
-    vi: {
+    1: {
         translation: translationVI
     }
 };
@@ -20,7 +20,7 @@ i18n
     .use(initReactI18next)
     .init({
         resources,
-        fallbackLng: 'vi',
+        fallbackLng: '0',
         debug: true,
         interpolation: {
             escapeValue: false // not needed for react as it escapes by default

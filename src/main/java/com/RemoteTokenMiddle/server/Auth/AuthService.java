@@ -11,8 +11,6 @@ import org.springframework.web.client.RestTemplate;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import okhttp3.FormBody;
-import okhttp3.HttpUrl;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -21,18 +19,16 @@ import okhttp3.Response;
 
 @Service
 public class AuthService {
-    private final String AUTH_URL = "http://192.168.2.203:8084/RegistrationAuthority/tmsra/restapi/getAccessTokenForTMSRA";
+    private static final String getAccessTokenForTMSRAURL = "http://192.168.2.203:8084/RegistrationAuthority/tmsra/restapi/getAccessTokenForTMSRA";
+    private static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
 
-    public AuthResponse login(AuthRequest request) {
-
+    public AuthResponse signIn(AuthRequest request) {
         String username = request.getUsername();
         String password = request.getPassword();
-        RequestBody requestBody = new FormBody.Builder()
-                .add("userName", username)
-                .add("passWord", password)
-                .build();
+        RequestBody requestBody = RequestBody.create(JSON,
+                "{\"userName\":\"" + username + "\",\"passWord\":\"" + password + "\"}");
         Request req = new Request.Builder()
-                .url(AUTH_URL)
+                .url(getAccessTokenForTMSRAURL)
                 .post(requestBody)
                 .build();
         OkHttpClient client = new OkHttpClient();
@@ -40,24 +36,37 @@ public class AuthService {
             String responseBody = response.body().string();
             ObjectMapper mapper = new ObjectMapper();
             JsonNode root = mapper.readTree(responseBody);
-            String accessToken = root.path("access_token").asText();
+            String accessToken = root.path("accessToken").asText();
             if (accessToken.isEmpty() == false)
-                return new AuthResponse(true, username, accessToken, "1");
+                return new AuthResponse(true, username, accessToken);
             else
-                return new AuthResponse(false, null, null, "2");
+                return new AuthResponse(false, null, null);
         } catch (Exception e) {
-            return new AuthResponse(false, null, null, "3");
+            return new AuthResponse(false, null, null);
         }
     }
 
-    public String getJWTTokenFromCookie(HttpServletRequest request) {
+    public String readCookie(HttpServletRequest request, String key) {
         Cookie[] cookies = request.getCookies();
-        String accessToken = null;
+        String value = "";
+        if (cookies == null)
+            return "";
         for (Cookie cookie : cookies) {
-            if (cookie.getName().equals("access_token")) {
-                accessToken = cookie.getValue();
-            };
-        };
-        return accessToken;
+            if (cookie.getName().equals(key)) {
+                value = cookie.getValue();
+            }
+            ;
+        }
+        ;
+        return value;
+    };
+
+    public Cookie createCookies(String key, String value, Boolean isSecure , Boolean isHttpOnly, int maxAge) {
+        Cookie cookie = new Cookie(key, value);
+        cookie.setHttpOnly(isHttpOnly);
+        cookie.setSecure(isSecure);
+        cookie.setPath("/");
+        cookie.setMaxAge(maxAge);
+        return cookie;
     }
 }

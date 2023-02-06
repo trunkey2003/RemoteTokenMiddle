@@ -123,7 +123,7 @@ export default function SignIn() {
                 </Button>
               </Form.Item>
 
-              <p className="mt-5 text-sm font-light text-gray-500">
+              {/* <p className="mt-5 text-sm font-light text-gray-500">
                 Don’t have an account yet?{" "}
                 <Link
                   to={"/sign-up"}
@@ -131,7 +131,7 @@ export default function SignIn() {
                 >
                   Sign up
                 </Link>
-              </p>
+              </p> */}
             </Form>
           </div>
         </div>

@@ -12,7 +12,7 @@ export default function Home() {
         navigate("/dashboard");
       })
       .catch((error) => {
-        const {status} = error.response;
+        const status = error.response?.status;
         if (status !== 401) {
           message.error("Something went wrong with the server");
         }

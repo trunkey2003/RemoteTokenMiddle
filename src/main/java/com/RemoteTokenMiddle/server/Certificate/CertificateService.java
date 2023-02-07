@@ -33,6 +33,7 @@ public class CertificateService {
 
     private final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
     private final SendRequestService sendRequestService;
+    private final ObjectMapper mapper = new ObjectMapper();
 
     @Autowired
     public CertificateService(SendRequestService sendRequestService) {
@@ -42,16 +43,19 @@ public class CertificateService {
     public JsonNode getCertificateAuthorityForTMSRA(HttpServletRequest request, String language) {
         Map<String, String> jsonObject = new HashMap<>();
         jsonObject.put("language", language);
-        RequestBody requestBody = RequestBody.create(JSON, jsonObject.toString());
-        try (Response response = sendRequestService.postRequestAuth(requestBody, getCertificateAuthorityForTMSRAURL,
-                request)) {
+        try {
+            String json = mapper.writeValueAsString(jsonObject);
+            RequestBody requestBody = RequestBody.create(JSON, json);
+            Response response = sendRequestService.postRequestAuth(requestBody, getCertificateAuthorityForTMSRAURL,
+                request); 
             String responseBody = response.body().string();
             ObjectMapper mapper = new ObjectMapper();
             JsonNode root = mapper.readTree(responseBody);
-            JsonNode certificateAuthorityInfo = root.findValues("certificateAuthorityInfo").get(0);
-            if (certificateAuthorityInfo.size() == 0)
-                return null;
-            return certificateAuthorityInfo;
+            List<JsonNode> certificateAuthorityInfo = root.findValues("certificateAuthorityInfo");
+            if (certificateAuthorityInfo.size() == 0) {
+                return mapper.valueToTree("[]");
+            }
+            return certificateAuthorityInfo.get(0);
         } catch (Exception e) {
             return null;
         }
@@ -62,17 +66,18 @@ public class CertificateService {
         Map<String, String> jsonObject = new HashMap<>();
         jsonObject.put("language", language);
         jsonObject.put("certificateAuthorityCode", certificateAuthorityCode);
-        RequestBody requestBody = RequestBody.create(JSON, jsonObject.toString());
-        try (Response response = sendRequestService.postRequestAuth(requestBody, getCertificatePurposeForTMSRAURL,
-                request)) {
+        try {
+            String json = mapper.writeValueAsString(jsonObject);
+            RequestBody requestBody = RequestBody.create(JSON, json);
+            Response response = sendRequestService.postRequestAuth(requestBody, getCertificatePurposeForTMSRAURL,
+                    request);
             String responseBody = response.body().string();
-
-            ObjectMapper mapper = new ObjectMapper();
             JsonNode root = mapper.readTree(responseBody);
-            JsonNode certificatePurposeInfo = root.findValues("certificatePurposeInfo").get(0);
-            if (certificatePurposeInfo.size() == 0)
-                return null;
-            return certificatePurposeInfo;
+            List<JsonNode> certificatePurposeInfo = root.findValues("certificatePurposeInfo");
+            if (certificatePurposeInfo.size() == 0) {
+                return mapper.valueToTree("[]");
+            }
+            return certificatePurposeInfo.get(0);
         } catch (Exception e) {
             return null;
         }
@@ -88,21 +93,22 @@ public class CertificateService {
         jsonObject.put("formFactorCode", formFactorCode);
         jsonObject.put("renewProfileEnabled", renewProfileEnabled.toString());
         jsonObject.put("certificateProfileCode", certificateProfileCode);
-
-        RequestBody requestBody = RequestBody.create(JSON, jsonObject.toString());
-        try (Response response = sendRequestService.postRequestAuth(requestBody, getCertificateProfileForTMSRAURL,
-                request)) {
+        try {
+            String json = mapper.writeValueAsString(jsonObject);
+            RequestBody requestBody = RequestBody.create(JSON, json);
+            Response response = sendRequestService.postRequestAuth(requestBody, getCertificateProfileForTMSRAURL,
+                    request);
             String responseBody = response.body().string();
-
-            ObjectMapper mapper = new ObjectMapper();
             JsonNode root = mapper.readTree(responseBody);
-            JsonNode certificateProfileInfo = root.findValues("certificateProfileInfo").get(0);
-            if (certificateProfileInfo.size() == 0)
-                return null;
-            return certificateProfileInfo;
+            List<JsonNode> certificateProfileInfo = root.findValues("certificateProfileInfo");
+            if (certificateProfileInfo.size() == 0) {
+                return mapper.valueToTree("[]");
+            }
+            return certificateProfileInfo.get(0);
         } catch (Exception e) {
             return null;
         }
+
     }
 
     public JsonNode getCertificateComponentForTMSRA(HttpServletRequest request, String language,
@@ -112,18 +118,18 @@ public class CertificateService {
         jsonObject.put("certificateAuthorityCode", certificateAuthorityCode);
         jsonObject.put("certificatePurposeCode", certificatePurposeCode);
         jsonObject.put("formFactorCode", formFactorCode);
-
-        RequestBody requestBody = RequestBody.create(JSON, jsonObject.toString());
-        try (Response response = sendRequestService.postRequestAuth(requestBody, getCertificateComponentForTMSRAURL,
-                request)) {
+        try {
+            String json = mapper.writeValueAsString(jsonObject);
+            RequestBody requestBody = RequestBody.create(JSON, json);
+            Response response = sendRequestService.postRequestAuth(requestBody, getCertificateComponentForTMSRAURL,
+                    request);
             String responseBody = response.body().string();
-
-            ObjectMapper mapper = new ObjectMapper();
             JsonNode root = mapper.readTree(responseBody);
-            JsonNode certificateComponentInfo = root.findValues("certificateComponentInfo").get(0);
-            if (certificateComponentInfo.size() == 0)
-                return null;
-            return certificateComponentInfo;
+            List<JsonNode> certificateComponentInfo = root.findValues("certificateComponentInfo");
+            if (certificateComponentInfo.size() == 0) {
+                return mapper.valueToTree("[]");
+            }
+            return certificateComponentInfo.get(0);
         } catch (Exception e) {
             return null;
         }

@@ -16,7 +16,7 @@ export default function AuthLayout({ children }) {
         dispatch(initUserInfo({ username }));
       })
       .catch((error) => {
-        const { status } = error.response;
+        const status = error.response?.status;
         navigate("/sign-in");
         if (status !== 401) {
           message.error("Something went wrong with the server");

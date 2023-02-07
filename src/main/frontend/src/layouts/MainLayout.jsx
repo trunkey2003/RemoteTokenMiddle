@@ -9,7 +9,7 @@ export default function MainLayout({ children }) {
       <div
         className="min-h-screen bg-cover bg-center"
         style={{
-          backgroundImage: "url('/images/login-bg.webp')",
+          backgroundImage: `url(${require('../assets/images/login-bg.png')})`,
         }}
       >
         {children}

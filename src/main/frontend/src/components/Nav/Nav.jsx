@@ -23,7 +23,7 @@ export default function Nav() {
       <div className="container flex flex-wrap items-center justify-between mx-auto">
         <a href="/" className="flex items-center">
           <img
-            src="/images/logo.webp"
+            src={require('../../assets/images/logo.png')}
             className="ml-5 md:ml-0 h-[50px]"
             alt="Flowbite Logo"
           />

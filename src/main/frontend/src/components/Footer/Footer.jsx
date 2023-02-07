@@ -7,7 +7,7 @@ export default function Footer() {
         <div className="mb-6 md:mb-0">
           <a href="/" className="flex items-center">
             <img
-              src="/images/logo.webp"
+              src={require('../../assets/images/logo.png')}
               className="h-[80px]"
               alt="FlowBite Logo"
             />

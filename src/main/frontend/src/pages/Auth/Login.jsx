@@ -38,7 +38,7 @@ export default function SignIn() {
     <div
       className="w-full flex flex-col items-center justify-center px-6 py-8 mx-auto h-screen lg:py-0 bg-cover bg-center"
       style={{
-        backgroundImage: "url('/images/login-bg.webp')",
+        backgroundImage: `url(${require('../../assets/images/login-bg.png')})`,
       }}
     >
       <div className="absolute top-0 left-0 h-full w-full flex items-center justify-center backdrop-blur-sm">
@@ -48,7 +48,7 @@ export default function SignIn() {
               to="/"
               className="flex items-center mb-6 justify-center hover:opacity-80"
             >
-              <img className="h-[50px]" src="/images/logo.webp" alt="logo" />
+              <img className="h-[50px]" src={require('../../assets/images/logo.png')} alt="logo" />
             </Link>
             <h1 className="text-xl font-bold leading-tight tracking-tight text-blue-800 md:text-2xl text-center">
               {t("login.title")}

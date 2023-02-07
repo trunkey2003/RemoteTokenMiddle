@@ -43,6 +43,7 @@ public class AuthService {
             else
                 return new AuthResponse(false, null, null);
         } catch (Exception e) {
+            System.out.println(e.getMessage());
             return new AuthResponse(false, null, null);
         }
     }

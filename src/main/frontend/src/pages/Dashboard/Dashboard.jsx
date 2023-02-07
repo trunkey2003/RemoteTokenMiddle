@@ -11,13 +11,14 @@ import {
 const initDataState = {
   certificateAuthorityInfo: [],
   certificateProfileInfo: [],
-  certificatePurposeInfo: []
+  certificatePurposeInfo: [],
 };
 
 const { Option } = Select;
 
 export default function Dashboard() {
   const [data, setData] = useState(initDataState);
+  const [fomrData, setFormData] = useState({});
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
 
@@ -29,7 +30,8 @@ export default function Dashboard() {
     setLoading(true);
     //refetch có tác dụng làm mới dữ liệu khi có sự thay đổi
     // sở dĩ không sử dụng state để lưu dữ liệu để tăng hiệu năng code bớt re-render
-    let data = {};
+    let newData = {...data};
+    let changes = {};
 
     try {
       if (refetch["certificateAuthorityInfo"]) {
@@ -40,44 +42,64 @@ export default function Dashboard() {
           "/certificate/getCertificateAuthorityForTMSRA?" +
             authorityInfoParams.toString()
         );
-        data["certificateAuthorityInfo"] =
-          certificateAuthorityInfo.data.data;
-      };
-  
-      console.log(form.getFieldValue("certificateAuthorityCode") && refetch["certificateAuthorityInfo"])
-  
-      if (form.getFieldValue("certificateAuthorityCode") && refetch["certificateAuthorityInfo"]) {
-        form.setFieldValue("certificateProfileCode", null)
-        const profileInfoParams = new URLSearchParams({
-          language: 0,
-          certificateAuthorityCode: form.getFieldValue("certificateAuthorityCode"),
-        });
-        const certificateProfileInfo = await Axios.get(
-          "/certificate/getCertificateProfileForTMSRA?" +
-            profileInfoParams.toString()
-        );
-        data["certificateProfileInfo"] =
-          certificateProfileInfo.data.data;
-        console.log(certificateProfileInfo.data.data)
-      };
-  
-      if (form.getFieldValue("certificateAuthorityCode") && refetch["certificatePurposeInfo"]) {
-        form.setFieldValue("certificatePurposeCode", null)
+        newData["certificateAuthorityInfo"] = certificateAuthorityInfo.data.data;
+      }
+
+      console.log(
+        form.getFieldValue("certificateAuthorityCode") &&
+          refetch["certificateAuthorityInfo"]
+      );
+
+      if (
+        form.getFieldValue("certificateAuthorityCode") &&
+        refetch["certificatePurposeInfo"]
+      ) {
+        form.setFieldValue("certificatePurposeCode", null);
         const purposeInfoParams = new URLSearchParams({
           language: 0,
-          certificateAuthorityCode: form.getFieldValue("certificateAuthorityCode"),
+          certificateAuthorityCode: form.getFieldValue(
+            "certificateAuthorityCode"
+          ),
         });
         const certificatePurposeInfo = await Axios.get(
           "/certificate/getCertificatePurposeForTMSRA?" +
             purposeInfoParams.toString()
         );
-        data["certificatePurposeInfo"] =
-          certificatePurposeInfo.data.data;
+        newData["certificatePurposeInfo"] = certificatePurposeInfo.data.data;
+      } else if (refetch["certificatePurposeInfo"] || !form.getFieldValue("certificateAuthorityCode")){
+        newData["certificatePurposeInfo"] = [];
+        form.setFieldValue("certificatePurposeCode", null);
       };
-      setData(data);
-      setLoading(false)
+
+      if (
+        form.getFieldValue("certificateAuthorityCode") &&
+        form.getFieldValue("certificatePurposeCode") &&
+        refetch["certificateProfileInfo"]
+      ) {
+        form.setFieldValue("certificateProfileCode", null);
+        const profileInfoParams = new URLSearchParams({
+          language: 0,
+          certificateAuthorityCode: form.getFieldValue(
+            "certificateAuthorityCode"
+          ),
+          certificatePurposeCode: form.getFieldValue(
+            "certificatePurposeCode"
+          )
+        });
+        const certificateProfileInfo = await Axios.get(
+          "/certificate/getCertificateProfileForTMSRA?" +
+            profileInfoParams.toString()
+        );
+        newData["certificateProfileInfo"] = certificateProfileInfo.data.data;
+      } else if (refetch["certificateProfileInfo"] || !form.getFieldValue("certificateAuthorityCode") || !form.getFieldValue("certificatePurposeCode")){
+        newData["certificateProfileInfo"] = [];
+        form.setFieldValue("certificateProfileCode", null);
+      };
+
+      setData(newData);
+      setLoading(false);
     } catch {
-      setLoading(false)
+      setLoading(false);
     }
   };
 
@@ -104,12 +126,54 @@ export default function Dashboard() {
                   },
                 ]}
               >
-                <Select size="large" id="certificateAuthorityCode" onChange={(value) => handleFetchData({certificateAuthorityInfo: true, certificatePurposeInfo: true})}>
-                  <Option value={null}>{loading ? <Spin/> : '----'}</Option>
+                <Select
+                  size="large"
+                  id="certificateAuthorityCode"
+                  onChange={(value) =>
+                    handleFetchData({
+                      certificateProfileCode: true,
+                      certificatePurposeInfo: true,
+                    })
+                  }
+                >
+                  <Option value={null}>{loading ? <Spin /> : "----"}</Option>
                   {data.certificateAuthorityInfo &&
                     data.certificateAuthorityInfo.map((item, index) => (
-                      <Option key={index} value={item.certificateAuthorityCode}>
+                      <Option key={item.certificateAuthorityCode} value={item.certificateAuthorityCode}>
                         {item.certificateAuthorityName}
+                      </Option>
+                    ))}
+                </Select>
+              </Form.Item>
+              <Form.Item
+                name="certificatePurposeCode"
+                label={
+                  <label
+                    htmlFor="certificatePurposeCode"
+                    className="block text-[16px] font-medium text-blue-800"
+                  >
+                    Certificate Purpose Code
+                  </label>
+                }
+                rules={[
+                  {
+                    required: true,
+                    message: "Please select certificate purpose code",
+                  },
+                ]}
+              >
+                <Select
+                  size="large"
+                  id="certificatePurposeCode"
+                  onChange={(value) =>
+                    handleFetchData({ certificateProfileInfo: true })
+                  }
+                >
+                  <Option value={null}>{loading ? <Spin /> : "----"}</Option>
+                  {data.certificatePurposeInfo &&
+                    data.certificatePurposeInfo.map((item, index) => (
+                      <Option key={item.certificatePurposeCode} value={item.certificatePurposeCode}>
+                        {item.certificatePurposeName}
                       </Option>
                     ))}
                 </Select>
@@ -132,38 +196,11 @@ export default function Dashboard() {
                 ]}
               >
                 <Select size="large" id="certificateProfileCode">
-                  <Option value={null}>{loading ? <Spin/> : '----'}</Option>
+                  <Option value={null}>{loading ? <Spin /> : "----"}</Option>
                   {data.certificateProfileInfo &&
                     data.certificateProfileInfo.map((item, index) => (
-                      <Option key={index} value={item.certificateProfileCode}>
+                      <Option key={item.certificateProfileCode} value={item.certificateProfileCode}>
                         {item.certificateProfileName}
-                      </Option>
-                    ))}
-                </Select>
-              </Form.Item>
-              <Form.Item
-                name="certificatePurposeCode"
-                label={
-                  <label
-                    htmlFor="certificatePurposeCode"
-                    className="block text-[16px] font-medium text-blue-800"
-                  >
-                    Certificate Purpose Code
-                  </label>
-                }
-                rules={[
-                  {
-                    required: true,
-                    message: "Please select certificate purpose code",
-                  },
-                ]}
-              >
-                <Select size="large" id="certificatePurposeCode">
-                  <Option value={null}>{loading ? <Spin/> : '----'}</Option>
-                  {data.certificatePurposeInfo &&
-                    data.certificatePurposeInfo.map((item, index) => (
-                      <Option key={index} value={item.certificatePurposeCode}>
-                        {item.certificatePurposeName}
                       </Option>
                     ))}
                 </Select>
